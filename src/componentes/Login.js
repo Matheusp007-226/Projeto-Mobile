@@ -1,16 +1,17 @@
 import { StatusBar } from 'expo-status-bar';
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import Cadastro from './Cadastro'
 import { Ionicons } from '@expo/vector-icons'
 import { StyleSheet, Text, View, KeyboardAvoidingView , Image, TextInput, TouchableOpacity, Animated, AsyncStorage, Alert} from 'react-native';
-
+import {LoginContext} from './../../ApisContext'
 export default function Login( { navigation } ) {
 
 const [email, setEmail] = useState('')
 const [senha, setSenha] = useState('')
 const [alunos, setAlunos] = useState([])
 const [hidePass, setHidePass] = useState(true)
+const [login, setLogin] = useContext(LoginContext);
 
 
 
@@ -28,7 +29,7 @@ const [hidePass, setHidePass] = useState(true)
             const alunos_async_json = await AsyncStorage.getItem ('alunosUS')
 
             let alunos_async = JSON.parse(alunos_async_json);
-                if( !alunos_async ){
+                if(!alunos_async ){
                     Alert.alert("Usuário não existe!")
                 }else{
                   let log = false
@@ -37,7 +38,8 @@ const [hidePass, setHidePass] = useState(true)
                       existe = true
                           if(dado.senha === senha){
                             dado.logou = true
-                            log = true
+                            log = true;
+                            setLogin(dado.nome);
                             navigation.navigate('Drower')
                           }else{
                               Alert.alert('Senha incorreta!')
@@ -48,7 +50,8 @@ const [hidePass, setHidePass] = useState(true)
 
                  if(log){
                   await AsyncStorage.setItem('alunosUS', JSON.stringify(alunos_async) ).then( ()=>{
-                    Alert.alert('Aluno logado com sucesso!')
+                     
+                            Alert.alert('Bem vindo ' + login)
                } )
                .catch( ()=>{
                  Alert.alert('Não foi possiível alterar o dado de log!')

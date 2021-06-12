@@ -1,20 +1,27 @@
 import * as React from 'react';
-import  {useEffect, Component} from 'react';
-import { Button, View, Text, StyleSheet, TouchableWithoutFeedback, ScrollView, AsyncStorage,TouchableOpacity, FlatList, Alert, Image } from 'react-native';
+import  {useEffect, useContext, Component} from 'react';
+import { Button, View, Text, Modal, StyleSheet, TouchableWithoutFeedback, ScrollView, AsyncStorage,TouchableOpacity, FlatList, Alert, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import { Feather as Icon , Entypo} from '@expo/vector-icons';
 import { useState } from 'react/cjs/react.development';
 import AddLivro from './AddLivro'
+import ClienteService from '../../services/ClienteService';
+import {ModalContext} from '../../ApisContext';
+import Cadastro from './Cadastro'
 
+const Stack2 = createStackNavigator();
 
-
-export default function Livros({ navigation }) {
+export default function Livros({ navigation }, props) {
 
 const [isAddLivroModalOpen, setIsAddLivroModalOpen] = useState(false)
 const [isDeleteLivroModalOpen, setIsDeleteLivroModalOpen] = useState(false)
 const [selectedLivro, setSelectedLivro] = useState(false)
 const [livros, setLivros] = useState([])
+const [refresh, setRefresh] = useState(false)
 var lista;
+
+
 
 
 const addLivro = (data) =>{
@@ -45,21 +52,32 @@ useEffect(()=>{
   
       
     
-      const livros_async_json = await AsyncStorage.getItem ('livrosUS')
+      //const livros_async_json = await AsyncStorage.getItem ('livrosUS')
     
-        let livros_async = JSON.parse(livros_async_json);
+        //let livros_async = JSON.parse(livros_async_json);
     
-            if( !livros_async ){
-              Alert.alert('Nenhum livro encontrado!')
-            }else{
-              setLivros(...livros, livros_async)
-            }
+            //if( !livros_async ){
+             // Alert.alert('Nenhum livro encontrado!')
+           // }else{
+            ClienteService.getAll().then(
+               res =>{
+                setLivros(...livros, res.data)
+               }
+             ).catch( ()=>{
+                    Alert.alert('Nenhum livro encontrado!')
+                  } )
+
+                 
+              
+            //}
     
     }
 
  mostraLivro()
 
 },[]);
+
+
 
 
 useEffect(()=>{
@@ -153,7 +171,8 @@ let editarLivro = () =>{
                                       <FlatList
                                             data={livros}
                                             nav={ navigation }
-                                            keyExtractor={(item) => item.idLivro}
+                                            extraData={refresh}
+                                            keyExtractor={(item) => item.id}
                                             renderItem={ ({item}) => <Livro data={item} /> }
                                       />
                                       
@@ -294,7 +313,8 @@ containerBotaoAdd:{
       super(props)
 
       this.state = {
-        editarLivro: false
+        editarLivro: false,
+        delete_yes: 0
       }
     }
 
@@ -302,6 +322,8 @@ containerBotaoAdd:{
 
    
     render(){
+
+      
 
       const ediLivro = () =>{
 
@@ -312,21 +334,65 @@ containerBotaoAdd:{
 
       const deleteLivro = async (id) => {
         
+  
+        //const livros_async_json = await AsyncStorage.getItem ('livrosUS')
       
-        const livros_async_json = await AsyncStorage.getItem ('livrosUS')
-      
-        var livros_async = JSON.parse(livros_async_json);
+        //var livros_async = JSON.parse(livros_async_json);
       
         
-          const index = await livros_async.findIndex(item => item.idLivro === id);
-          livros_async.splice(index, 1);
-          return AsyncStorage.setItem('livrosUS', JSON.stringify(livros_async));
+          //const index = await livros_async.findIndex(item => item.idLivro === id);
+          //livros_async.splice(index, 1);
+          ClienteService.remove(id).then(
+            ()=>{
+              
+              Alert.alert('Livro ' + id + ' deletado com sucesso!')
+              
+            }
+          ).catch( ()=>{
+            Alert.alert('Ocorreu um erro ao deletar o livro!')
+          } )
+          //return AsyncStorage.setItem('livrosUS', JSON.stringify(livros_async));
+          
+      }
+
+
+      const editarLivro = async (id) => {
+
+       
+
+       
+
+        //{this.state.modal= !this.state.modal}
+
+        /*<NavigationContainer>
+            <Stack2.Navigator>
+              
+              <Stack2.Screen name="Cadastro" component={Cadastro} options={{ headerShown: false }} />
+             
+            
+            </Stack2.Navigator>
+      </NavigationContainer>*/
+      
+        //const livros_async_json = await AsyncStorage.getItem ('livrosUS')
+      
+        //var livros_async = JSON.parse(livros_async_json);
+      
+        
+          //const index = await livros_async.findIndex(item => item.idLivro === id);
+
+         
+          
+
+          //livros_async.splice(index, 1);
+          //return AsyncStorage.setItem('livrosUS', JSON.stringify(livros_async));
           
       }
 
       return(
+
+        
         <View style={styles.areaPessoa}>
-          <Text style={styles.textoPessoa}>ID: {this.props.data.idLivro} </Text>
+          <Text style={styles.textoPessoa}>ID: {this.props.data.id} </Text>
           <Text style={styles.textoPessoa}>Nome: {this.props.data.nome} </Text>
           <Text style={styles.textoPessoa}>Editor(a): {this.props.data.editor} </Text>
           <Text style={styles.textoPessoa}>Categoria: {this.props.data.suspense ? 'Suspense' : ''} {this.props.data.fantasia ? ' Fantasia': ''} {this.props.data.ficcao ? ' Ficção' : ''} </Text>
@@ -336,16 +402,16 @@ containerBotaoAdd:{
             
           <View style={styles.buttonsContainer}>
             <TouchableOpacity 
-                style={styles.deleteButton} onPress={() => {deleteLivro(this.props.data.idLivro)}}> 
+                style={styles.deleteButton} onPress={() => {deleteLivro(this.props.data.id)}}> 
                 <Icon name="trash" color="white" size={18} />
             </TouchableOpacity> 
             <TouchableOpacity 
-                style={styles.editButton} > 
+                style={styles.editButton} onPress={() => {editarLivro(this.props.data.id)}}> 
                 <Icon name="edit" color="white" size={18}/>
             </TouchableOpacity> 
           </View>
           
-         
+                
           </View>
         
       );

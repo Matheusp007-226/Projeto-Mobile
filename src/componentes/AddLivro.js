@@ -6,13 +6,13 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 import { useState } from 'react/cjs/react.development';
 
-
+import ClienteService from '../../services/ClienteService';
 
 export default function AddLivro({ navigation }, props) {
 
 const inicioLivro = 
 {
-  idLivro: 0,
+  idLivro: 1,
   nome: "",
   editor: "",
   categoria: "",
@@ -82,10 +82,10 @@ async function insereLivro(){
         Alert.alert('Preencha todos os campos e pelo menos um de categoria')
     }else{
         var existe = false
-        const livros_async_json = await AsyncStorage.getItem ('livrosUS')
+       // const livros_async_json = await AsyncStorage.getItem ('livrosUS')
 
-        var livros_async = JSON.parse(livros_async_json);
-            if( !livros_async ){
+        //var livros_async = JSON.parse(livros_async_json);
+            /*if( !livros_async ){
                 livros_async = []
                 await AsyncStorage.setItem('livrosUS', JSON.stringify(livros_async) ).then( ()=>{
                   Alert.alert('Livro adicionado com sucesso!' + livro.idLivro)
@@ -94,28 +94,36 @@ async function insereLivro(){
              .catch( ()=>{
                Alert.alert('Ocorreu um erro ao salvar o livro!')
              } )
-            }else{
-              livros_async.forEach((item) =>{
+            *///}else{
+              /*livros_async.forEach((item) =>{
                 if(item.nome === livro.nome){
                     existe = true
                 }
-              })
+              })*/
 
-              if(existe){
-                Alert.alert("Esse livro já está cadastrado!")
-              }else{
-                          livros_async.push(livro)
+              //if(existe){
+                //Alert.alert("Esse livro já está cadastrado!")
+              //}else{
+
+
+
+                  ClienteService.create(livro).then(
+                    ()=>{
+                      Alert.alert('Livro adicionado com sucesso!')
+                    }
+                  ).catch( ()=>{
+                    Alert.alert('Ocorreu um erro ao salvar o livro!')
+                  } )
+                        /*  livros_async.push(livro)
                           await AsyncStorage.setItem('livrosUS', JSON.stringify(livros_async) ).then( ()=>{
                         Alert.alert('Livro adicionado com sucesso!' + livro.idLivro)
                         
-                    } )
-                    .catch( ()=>{
-                      Alert.alert('Ocorreu um erro ao salvar o livro!')
-                    } )
-              }
+                    } )*/
+                    
+              //}
              
              
-            }
+            //}
 
 
         

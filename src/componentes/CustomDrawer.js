@@ -3,7 +3,11 @@ import { View, Text, Image} from 'react-native';
 import { DrawerContentScrollView, DrawerItemList } from '@react-navigation/drawer';
 import { roundToNearestPixel } from 'react-native/Libraries/Utilities/PixelRatio';
 
+
+
+
 export default function CustomDrawer(props){
+ 
   return(
     <DrawerContentScrollView {...props} >
       <View style={{
@@ -15,7 +19,7 @@ export default function CustomDrawer(props){
         style={{width: 65, height: 65}}
         />
         <Text style={{color: '#000', fontSize: 17, marginTop: 5, marginBottom:25}}>
-          Bem-vindo! 
+          Bem-vindo!
         </Text>
       </View>
 
